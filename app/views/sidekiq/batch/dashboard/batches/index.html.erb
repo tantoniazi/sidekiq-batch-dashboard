@@ -1,0 +1,68 @@
+<div class="d-flex justify-content-between align-items-center mb-4">
+  <h1 class="h3 mb-0">Batches</h1>
+  <div class="d-flex gap-2 align-items-center">
+    <span class="text-muted small">Filter:</span>
+    <%= link_to "All", batches_path(sort: params[:sort]), class: "btn btn-sm btn-outline-secondary #{params[:status].blank? ? 'active' : ''}" %>
+    <%= link_to "Running", batches_path(status: 'running', sort: params[:sort]), class: "btn btn-sm btn-outline-secondary #{params[:status] == 'running' ? 'active' : ''}" %>
+    <%= link_to "Complete", batches_path(status: 'complete', sort: params[:sort]), class: "btn btn-sm btn-outline-secondary #{params[:status] == 'complete' ? 'active' : ''}" %>
+    <%= link_to "Failed", batches_path(status: 'failed', sort: params[:sort]), class: "btn btn-sm btn-outline-secondary #{params[:status] == 'failed' ? 'active' : ''}" %>
+    <span class="text-muted small ms-2">Sort:</span>
+    <%= link_to "Newest", batches_path(status: params[:status]), class: "btn btn-sm btn-outline-secondary #{params[:sort].blank? ? 'active' : ''}" %>
+    <%= link_to "Oldest", batches_path(status: params[:status], sort: 'created_at_asc'), class: "btn btn-sm btn-outline-secondary #{params[:sort] == 'created_at_asc' ? 'active' : ''}" %>
+    <%= link_to "Total jobs", batches_path(status: params[:status], sort: 'total_desc'), class: "btn btn-sm btn-outline-secondary #{params[:sort] == 'total_desc' ? 'active' : ''}" %>
+    <%= link_to "Failures", batches_path(status: params[:status], sort: 'failed_desc'), class: "btn btn-sm btn-outline-secondary #{params[:sort] == 'failed_desc' ? 'active' : ''}" %>
+  </div>
+</div>
+
+<div class="card border-0 shadow-sm">
+  <div class="table-responsive">
+    <table class="table table-hover align-middle mb-0">
+      <thead class="table-light">
+        <tr>
+          <th>Batch ID</th>
+          <th>Description</th>
+          <th class="text-end">Total</th>
+          <th class="text-end">Pending</th>
+          <th class="text-end">Failed</th>
+          <th>Created At</th>
+          <th>Status</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody>
+        <% if @batches.blank? %>
+          <tr>
+            <td colspan="8" class="text-center text-muted py-5">No batches found. Batches appear here when using sidekiq-batch.</td>
+          </tr>
+        <% else %>
+          <% @batches.each do |batch| %>
+            <tr>
+              <td><code class="small"><%= batch.id %></code></td>
+              <td><%= batch.description.presence || "—" %></td>
+              <td class="text-end"><%= batch.total %></td>
+              <td class="text-end"><%= batch.pending %></td>
+              <td class="text-end"><%= batch.failed_count %></td>
+              <td><%= batch.created_at ? l(batch.created_at, format: :short) : "—" %></td>
+              <td>
+                <% case batch.status %>
+                <% when "running" %>
+                  <span class="badge bg-primary">Running</span>
+                <% when "complete" %>
+                  <span class="badge bg-success">Complete</span>
+                <% when "failed" %>
+                  <span class="badge bg-danger">Failed</span>
+                <% else %>
+                  <span class="badge bg-secondary"><%= batch.status %></span>
+                <% end %>
+              </td>
+              <td>
+                <%= link_to "View", batch_path(batch.id), class: "btn btn-sm btn-outline-primary" %>
+                <%= link_to "Jobs", jobs_path(batch_id: batch.id), class: "btn btn-sm btn-outline-secondary" %>
+              </td>
+            </tr>
+          <% end %>
+        <% end %>
+      </tbody>
+    </table>
+  </div>
+</div>

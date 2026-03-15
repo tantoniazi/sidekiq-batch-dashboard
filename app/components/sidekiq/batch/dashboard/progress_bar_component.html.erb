@@ -1,0 +1,16 @@
+<div class="progress-bar-wrapper">
+  <% if @label.present? %>
+    <div class="d-flex justify-content-between mb-1">
+      <span class="small text-muted"><%= @label %></span>
+      <% if @show_percent %>
+        <span class="small fw-semibold"><%= percent %>%</span>
+      <% end %>
+    </div>
+  <% end %>
+  <div class="progress" style="height: 1.25rem;">
+    <div class="progress-bar bg-primary" role="progressbar" style="width: <%= percent %>%" aria-valuenow="<%= @current %>" aria-valuemin="0" aria-valuemax="<%= @total %>"></div>
+  </div>
+  <% if @label.blank? && @show_percent %>
+    <div class="text-end mt-1 small text-muted"><%= @current %> / <%= @total %> (<%= percent %>%)</div>
+  <% end %>
+</div>

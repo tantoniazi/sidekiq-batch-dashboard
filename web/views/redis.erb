@@ -1,0 +1,14 @@
+<div class="container-fluid mt-3">
+  <h2>Redis</h2>
+  <div class="card">
+    <div class="card-body">
+      <p>Latency: <strong><%= @redis[:latency_ms] %> ms</strong></p>
+      <% if @redis[:used_memory_mb] %>
+        <p>Used memory: <strong><%= @redis[:used_memory_mb] %> MB</strong></p>
+      <% end %>
+      <% if @redis[:warning] %>
+        <div class="alert alert-warning"><%= @redis[:warning] %></div>
+      <% end %>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,33 @@
+<div class="container-fluid mt-3">
+  <h2>Workers</h2>
+  <h3>Top slow workers</h3>
+  <table class="table table-striped">
+    <thead><tr><th>Worker</th><th>Avg duration (s)</th><th>Max duration (s)</th><th>Avg memory delta</th><th>Samples</th></tr></thead>
+    <tbody>
+      <% (@slow || []).each do |w| %>
+        <tr>
+          <td><%= w[:worker] %></td>
+          <td><%= w[:avg_duration] %></td>
+          <td><%= w[:max_duration] %></td>
+          <td><%= w[:avg_memory_delta] %></td>
+          <td><%= w[:samples] %></td>
+        </tr>
+      <% end %>
+      <% if (@slow || []).empty? %>
+        <tr><td colspan="5">No worker metrics yet.</td></tr>
+      <% end %>
+    </tbody>
+  </table>
+  <h3 class="mt-4">Throughput by queue</h3>
+  <table class="table table-striped">
+    <thead><tr><th>Queue</th><th>Jobs</th></tr></thead>
+    <tbody>
+      <% (@throughput || {}).each do |q, count| %>
+        <tr><td><%= q %></td><td><%= count %></td></tr>
+      <% end %>
+      <% if (@throughput || {}).empty? %>
+        <tr><td colspan="2">No data.</td></tr>
+      <% end %>
+    </tbody>
+  </table>
+</div>

@@ -1,0 +1,86 @@
+<nav aria-label="breadcrumb" class="mb-3">
+  <ol class="breadcrumb">
+    <li class="breadcrumb-item"><%= link_to "Batches", batches_path %></li>
+    <li class="breadcrumb-item active" aria-current="page"><%= @batch_info.id %></li>
+  </ol>
+</nav>
+
+<div class="d-flex justify-content-between align-items-start mb-4">
+  <div>
+    <h1 class="h3 mb-1">Batch <code><%= @batch_info.id %></code></h1>
+    <p class="text-muted mb-0"><%= @batch_info.description.presence || "No description" %></p>
+  </div>
+  <span class="badge fs-6 <%= @batch_info.status == 'running' ? 'bg-primary' : @batch_info.status == 'complete' ? 'bg-success' : 'bg-danger' %>">
+    <%= @batch_info.status.capitalize %>
+  </span>
+</div>
+
+<div class="row g-3 mb-4">
+  <div class="col-md-3">
+    <%= render Sidekiq::Batch::Dashboard::StatsCardComponent.new(title: "Total jobs", value: @batch_info.total) %>
+  </div>
+  <div class="col-md-3">
+    <%= render Sidekiq::Batch::Dashboard::StatsCardComponent.new(title: "Completed", value: @inspector.completed_count) %>
+  </div>
+  <div class="col-md-3">
+    <%= render Sidekiq::Batch::Dashboard::StatsCardComponent.new(title: "Pending", value: @batch_info.pending) %>
+  </div>
+  <div class="col-md-3">
+    <%= render Sidekiq::Batch::Dashboard::StatsCardComponent.new(
+      title: "Success rate",
+      value: "#{@batch_info.success_rate}%",
+      badge: @batch_info.failed_count.zero? ? "OK" : "#{@batch_info.failed_count} failed",
+      css_class: @batch_info.failed_count.zero? ? "success" : "warning"
+    ) %>
+  </div>
+</div>
+
+<% if @batch_info.complete && @batch_info.created_at %>
+  <p class="text-muted small mb-3">
+    Execution time (approx.): <%= distance_of_time_in_words(@batch_info.created_at, Time.current) %> from start to now.
+  </p>
+<% end %>
+
+<div class="card border-0 shadow-sm mb-4">
+  <div class="card-header bg-white">
+    <h5 class="mb-0">Progress</h5>
+  </div>
+  <div class="card-body">
+    <%= render Sidekiq::Batch::Dashboard::ProgressBarComponent.new(
+      current: @inspector.completed_count,
+      total: @batch_info.total,
+      label: "Jobs completed"
+    ) %>
+  </div>
+</div>
+
+<% if @batch_info.failed_jids.present? %>
+  <div class="card border-0 shadow-sm">
+    <div class="card-header bg-white d-flex justify-content-between align-items-center">
+      <h5 class="mb-0">Failed jobs (<%= @batch_info.failed_jids.size %>)</h5>
+      <%= link_to "View all failures", failures_path, class: "btn btn-sm btn-outline-danger" %>
+    </div>
+    <div class="table-responsive">
+      <table class="table table-hover align-middle mb-0">
+        <thead class="table-light">
+          <tr>
+            <th>JID</th>
+            <th>Worker</th>
+            <th>Error</th>
+            <th>Retries</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% @inspector.failure_info.each do |info| %>
+            <tr>
+              <td><code class="small"><%= info[:jid] %></code></td>
+              <td><%= info[:worker].presence || "—" %></td>
+              <td class="small text-danger"><%= truncate(info[:error_message].to_s, length: 80) %></td>
+              <td><%= info[:retry_count] %></td>
+            </tr>
+          <% end %>
+        </tbody>
+      </table>
+    </div>
+  </div>
+<% end %>

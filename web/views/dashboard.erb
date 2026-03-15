@@ -1,0 +1,53 @@
+<div class="container-fluid mt-3">
+  <h2>APM Dashboard</h2>
+  <div class="row">
+    <div class="col-md-4">
+      <div class="card">
+        <div class="card-header">Redis</div>
+        <div class="card-body">
+          <p class="mb-0">Latency: <%= @stats.dig(:redis, :latency_ms) %> ms</p>
+          <% if @stats.dig(:redis, :warning) %>
+            <span class="badge bg-warning"><%= @stats[:redis][:warning] %></span>
+          <% end %>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-4">
+      <div class="card">
+        <div class="card-header">Thread pool</div>
+        <div class="card-body">
+          <p class="mb-0">Active: <%= @stats.dig(:pool, :active_approx) %> / <%= @stats.dig(:pool, :concurrency) %></p>
+          <% if @stats.dig(:pool, :saturated) %>
+            <span class="badge bg-danger">Saturated</span>
+          <% end %>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-4">
+      <div class="card">
+        <div class="card-header">Alerts</div>
+        <div class="card-body">
+          <p class="mb-0">Stuck jobs: <%= @stats[:stuck] %></p>
+          <p class="mb-0">Memory leak suspects: <%= @stats[:memory_leaks] %></p>
+        </div>
+      </div>
+    </div>
+  </div>
+  <h3 class="mt-4">Top slow workers</h3>
+  <table class="table table-striped">
+    <thead><tr><th>Worker</th><th>Avg duration</th><th>Max duration</th><th>Count</th></tr></thead>
+    <tbody>
+      <% (@stats[:slow_workers] || []).each do |w| %>
+        <tr>
+          <td><%= w[:worker] %></td>
+          <td><%= w[:avg_duration] %>s</td>
+          <td><%= w[:max_duration] %>s</td>
+          <td><%= w[:count] %></td>
+        </tr>
+      <% end %>
+      <% if (@stats[:slow_workers] || []).empty? %>
+        <tr><td colspan="4">No data yet. Run some jobs.</td></tr>
+      <% end %>
+    </tbody>
+  </table>
+</div>

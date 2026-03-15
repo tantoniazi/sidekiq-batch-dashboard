@@ -1,0 +1,45 @@
+<div class="container-fluid mt-3">
+  <h2>Diagnostics</h2>
+  <% if @concurrency[:issues]&.any? %>
+    <div class="alert alert-warning">
+      <strong>Concurrency</strong>
+      <ul class="mb-0"><% @concurrency[:issues].each do |i| %><li><%= i %></li><% end %></ul>
+    </div>
+  <% end %>
+  <% if @config[:issues]&.any? %>
+    <div class="alert alert-warning">
+      <strong>Config</strong>
+      <ul class="mb-0"><% @config[:issues].each do |i| %><li><%= i %></li><% end %></ul>
+    </div>
+  <% end %>
+  <h3>Stuck jobs</h3>
+  <table class="table table-striped">
+    <thead><tr><th>Worker</th><th>JID</th><th>Expected (s)</th><th>Running (s)</th></tr></thead>
+    <tbody>
+      <% (@stuck || []).each do |s| %>
+        <tr><td><%= s[:worker] %></td><td><code><%= s[:jid] %></code></td><td><%= s[:expected_approx_sec] %></td><td><%= s[:running_sec] %></td></tr>
+      <% end %>
+      <% if (@stuck || []).empty? %><tr><td colspan="4">None</td></tr><% end %>
+    </tbody>
+  </table>
+  <h3>Possible deadlocks</h3>
+  <table class="table table-striped">
+    <thead><tr><th>Worker</th><th>JID</th><th>Thread</th><th>Runtime (s)</th></tr></thead>
+    <tbody>
+      <% (@deadlocks || []).each do |d| %>
+        <tr><td><%= d[:worker] %></td><td><code><%= d[:jid] %></code></td><td><%= d[:thread_id] %></td><td><%= d[:runtime_sec] %></td></tr>
+      <% end %>
+      <% if (@deadlocks || []).empty? %><tr><td colspan="4">None</td></tr><% end %>
+    </tbody>
+  </table>
+  <h3>Thread safety (worker code)</h3>
+  <table class="table table-striped">
+    <thead><tr><th>Worker</th><th>Issues</th></tr></thead>
+    <tbody>
+      <% (@thread_safety || []).each do |t| %>
+        <tr><td><%= t[:worker] %></td><td><%= t[:issues].join("; ") %></td></tr>
+      <% end %>
+      <% if (@thread_safety || []).empty? %><tr><td colspan="2">None detected.</td></tr><% end %>
+    </tbody>
+  </table>
+</div>

@@ -1,0 +1,26 @@
+<div class="chart-container" style="position: relative; height: <%= @height %>px;">
+  <canvas id="<%= @id %>"></canvas>
+</div>
+<script>
+(function() {
+  var ctx = document.getElementById('<%= @id %>');
+  if (!ctx) return;
+  new Chart(ctx.getContext('2d'), {
+    type: '<%= @type %>',
+    data: {
+      labels: <%= raw @labels.to_json %>,
+      datasets: <%= raw @datasets.to_json %>
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: { position: 'top' }
+      },
+      scales: {
+        y: { beginAtZero: true }
+      }
+    }
+  });
+})();
+</script>

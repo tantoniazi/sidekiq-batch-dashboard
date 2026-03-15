@@ -1,0 +1,18 @@
+<div class="container-fluid mt-3">
+  <h2>Logs (recent errors)</h2>
+  <table class="table table-striped">
+    <thead><tr><th>Worker</th><th>Message</th><th>At</th></tr></thead>
+    <tbody>
+      <% (@logs || []).each do |log| %>
+        <tr>
+          <td><%= log[:worker] %></td>
+          <td><%= log[:error_message].to_s[0, 300] %></td>
+          <td><%= Time.at(log[:at]).strftime("%H:%M:%S") if log[:at] %></td>
+        </tr>
+      <% end %>
+      <% if (@logs || []).empty? %>
+        <tr><td colspan="3">No logs.</td></tr>
+      <% end %>
+    </tbody>
+  </table>
+</div>

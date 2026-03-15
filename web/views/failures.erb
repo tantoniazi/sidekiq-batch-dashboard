@@ -1,0 +1,21 @@
+<div class="container-fluid mt-3">
+  <h2>Failures (captured errors)</h2>
+  <table class="table table-striped">
+    <thead><tr><th>Worker</th><th>JID</th><th>Queue</th><th>Error</th><th>Swallowed</th><th>At</th></tr></thead>
+    <tbody>
+      <% (@failures || []).each do |f| %>
+        <tr>
+          <td><%= f[:worker] %></td>
+          <td><code><%= f[:jid] %></code></td>
+          <td><%= f[:queue] %></td>
+          <td><%= f[:error_message].to_s[0, 200] %></td>
+          <td><%= f[:swallowed] ? "Yes" : "No" %></td>
+          <td><%= Time.at(f[:at]).strftime("%Y-%m-%d %H:%M") if f[:at] %></td>
+        </tr>
+      <% end %>
+      <% if (@failures || []).empty? %>
+        <tr><td colspan="6">No captured errors.</td></tr>
+      <% end %>
+    </tbody>
+  </table>
+</div>

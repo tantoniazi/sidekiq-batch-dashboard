@@ -1,0 +1,24 @@
+<div class="container-fluid mt-3">
+  <h2>Concurrency</h2>
+  <div class="card mb-3">
+    <div class="card-header">Thread pool</div>
+    <div class="card-body">
+      <p>Concurrency: <strong><%= @pool[:concurrency] %></strong></p>
+      <p>Active (approx): <strong><%= @pool[:active_approx] %></strong></p>
+      <p>Idle (approx): <strong><%= @pool[:idle_approx] %></strong></p>
+      <p>Queue backlog: <strong><%= @pool[:queue_backlog] %></strong></p>
+      <% if @pool[:saturated] %>
+        <span class="badge bg-danger">Thread pool saturated – queue backlog increasing</span>
+      <% end %>
+    </div>
+  </div>
+  <h3>Queue breakdown</h3>
+  <table class="table table-striped">
+    <thead><tr><th>Queue</th><th>Size</th></tr></thead>
+    <tbody>
+      <% (@pool[:queue_breakdown] || {}).each do |q, size| %>
+        <tr><td><%= q %></td><td><%= size %></td></tr>
+      <% end %>
+    </tbody>
+  </table>
+</div>

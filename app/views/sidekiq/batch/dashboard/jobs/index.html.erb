@@ -1,0 +1,67 @@
+<div class="d-flex justify-content-between align-items-center mb-4">
+  <h1 class="h3 mb-0">Jobs</h1>
+  <% if params[:batch_id].present? %>
+    <%= link_to "All jobs", jobs_path, class: "btn btn-outline-secondary" %>
+  <% else %>
+    <p class="text-muted small mb-0">Retry and dead set jobs (batch-related when filtered)</p>
+  <% end %>
+</div>
+
+<% if params[:batch_id].present? %>
+  <div class="alert alert-info">
+    Showing jobs for batch <code><%= params[:batch_id] %></code>.
+    <%= link_to "View batch", batch_path(params[:batch_id]), class: "alert-link" %>
+  </div>
+<% end %>
+
+<div class="card border-0 shadow-sm">
+  <div class="table-responsive">
+    <table class="table table-hover align-middle mb-0">
+      <thead class="table-light">
+        <tr>
+          <th>Job ID</th>
+          <th>Worker class</th>
+          <th>Arguments</th>
+          <th>Queue</th>
+          <th>Status</th>
+          <th>Runtime</th>
+          <% if params[:batch_id].present? %>
+            <th>Batch ID</th>
+          <% end %>
+        </tr>
+      </thead>
+      <tbody>
+        <% if @jobs.blank? %>
+          <tr>
+            <td colspan="<%= params[:batch_id].present? ? 7 : 6 %>" class="text-center text-muted py-5">No jobs found.</td>
+          </tr>
+        <% else %>
+          <% @jobs.each do |job| %>
+            <tr>
+              <td><code class="small"><%= job.jid %></code></td>
+              <td><%= job.worker_class.presence || "—" %></td>
+              <td class="small"><%= truncate(job.args.to_json, length: 60) %></td>
+              <td><%= job.queue.presence || "default" %></td>
+              <td>
+                <% case job.status %>
+                <% when "retry" %>
+                  <span class="badge bg-warning text-dark">Retry</span>
+                <% when "dead" %>
+                  <span class="badge bg-danger">Dead</span>
+                <% when "unknown" %>
+                  <span class="badge bg-secondary">Unknown</span>
+                <% else %>
+                  <span class="badge bg-secondary"><%= job.status %></span>
+                <% end %>
+              </td>
+              <td><%= job.runtime.presence || "—" %></td>
+              <% if params[:batch_id].present? %>
+                <td><%= job.batch_id.presence || "—" %></td>
+              <% end %>
+            </tr>
+          <% end %>
+        <% end %>
+      </tbody>
+    </table>
+  </div>
+</div>

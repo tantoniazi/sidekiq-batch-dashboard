@@ -1,0 +1,19 @@
+<div class="container-fluid mt-3">
+  <h2>Memory</h2>
+  <p>Workers with possible memory growth (avg increase per execution above threshold).</p>
+  <table class="table table-striped">
+    <thead><tr><th>Worker</th><th>Avg increase (MB)</th><th>Samples</th></tr></thead>
+    <tbody>
+      <% (@leaks || []).each do |l| %>
+        <tr>
+          <td><%= l[:worker] %></td>
+          <td><%= l[:avg_memory_increase_mb] %></td>
+          <td><%= l[:sample_count] %></td>
+        </tr>
+      <% end %>
+      <% if (@leaks || []).empty? %>
+        <tr><td colspan="3">No memory leak suspects detected.</td></tr>
+      <% end %>
+    </tbody>
+  </table>
+</div>

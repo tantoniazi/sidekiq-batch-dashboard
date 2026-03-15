@@ -1,0 +1,41 @@
+<div class="d-flex justify-content-between align-items-center mb-4">
+  <h1 class="h3 mb-0">Failures</h1>
+  <p class="text-muted small mb-0">Jobs in Retry Set and Dead Set</p>
+</div>
+
+<div class="card border-0 shadow-sm">
+  <div class="table-responsive">
+    <table class="table table-hover align-middle mb-0">
+      <thead class="table-light">
+        <tr>
+          <th>Job ID</th>
+          <th>Worker class</th>
+          <th>Arguments</th>
+          <th>Error message</th>
+          <th class="text-end">Retry count</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody>
+        <% if @failures.blank? %>
+          <tr>
+            <td colspan="6" class="text-center text-muted py-5">No failed jobs.</td>
+          </tr>
+        <% else %>
+          <% @failures.each do |job| %>
+            <tr>
+              <td><code class="small"><%= job.jid %></code></td>
+              <td><%= job.worker_class.presence || "—" %></td>
+              <td class="small"><%= truncate(job.args.to_json, length: 40) %></td>
+              <td class="small text-danger"><%= truncate(job.error_message.to_s, length: 80) %></td>
+              <td class="text-end"><%= job.retry_count %></td>
+              <td>
+                <%= button_to "Retry", retry_failure_path(job.jid), method: :post, class: "btn btn-sm btn-outline-primary", form: { data: { turbo_confirm: "Retry this job?" } } %>
+              </td>
+            </tr>
+          <% end %>
+        <% end %>
+      </tbody>
+    </table>
+  </div>
+</div>

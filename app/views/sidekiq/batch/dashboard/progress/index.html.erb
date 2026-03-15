@@ -1,0 +1,112 @@
+<% content_for :charts do %>
+  <%= javascript_include_tag "sidekiq/batch/dashboard/charts" %>
+<% end %>
+
+<h1 class="h3 mb-4">Progress &amp; Statistics</h1>
+
+<div class="row g-3 mb-4">
+  <div class="col-md-2">
+    <%= render Sidekiq::Batch::Dashboard::StatsCardComponent.new(title: "Total batches", value: @stats.total_batches) %>
+  </div>
+  <div class="col-md-2">
+    <%= render Sidekiq::Batch::Dashboard::StatsCardComponent.new(title: "Total jobs", value: @stats.total_jobs) %>
+  </div>
+  <div class="col-md-2">
+    <%= render Sidekiq::Batch::Dashboard::StatsCardComponent.new(title: "Completed", value: @stats.completed_jobs) %>
+  </div>
+  <div class="col-md-2">
+    <%= render Sidekiq::Batch::Dashboard::StatsCardComponent.new(title: "Failed", value: @stats.failed_jobs, css_class: "danger") %>
+  </div>
+  <div class="col-md-2">
+    <%= render Sidekiq::Batch::Dashboard::StatsCardComponent.new(title: "Success rate", value: "#{@stats.success_rate}%", css_class: "success") %>
+  </div>
+</div>
+
+<div class="row">
+  <div class="col-lg-8 mb-4">
+    <div class="card border-0 shadow-sm h-100">
+      <div class="card-header bg-white">
+        <h5 class="mb-0">Jobs processed (approximate, last 24h)</h5>
+      </div>
+      <div class="card-body">
+        <div class="chart-container" style="position: relative; height: 300px;">
+          <canvas id="jobsProcessedChart"></canvas>
+        </div>
+        <script>
+        (function() {
+          var ctx = document.getElementById('jobsProcessedChart');
+          if (!ctx || typeof Chart === 'undefined') return;
+          var labels = [];
+          for (var i = 23; i >= 0; i--) {
+            var d = new Date();
+            d.setHours(d.getHours() - i);
+            labels.push(d.getHours() + ':00');
+          }
+          new Chart(ctx.getContext('2d'), {
+            type: 'line',
+            data: {
+              labels: labels,
+              datasets: [{
+                label: 'Jobs completed',
+                data: <%= raw @jobs_per_minute.to_json %>,
+                borderColor: 'rgb(13, 110, 253)',
+                backgroundColor: 'rgba(13, 110, 253, 0.1)',
+                fill: true,
+                tension: 0.3
+              }]
+            },
+            options: {
+              responsive: true,
+              maintainAspectRatio: false,
+              plugins: { legend: { display: false } },
+              scales: {
+                y: { beginAtZero: true },
+                x: { display: true }
+              }
+            }
+          });
+        })();
+        </script>
+      </div>
+    </div>
+  </div>
+  <div class="col-lg-4 mb-4">
+    <div class="card border-0 shadow-sm h-100">
+      <div class="card-header bg-white">
+        <h5 class="mb-0">Success vs failures</h5>
+      </div>
+      <div class="card-body">
+        <div class="chart-container" style="position: relative; height: 260px;">
+          <canvas id="successFailuresChart"></canvas>
+        </div>
+        <script>
+        (function() {
+          var ctx = document.getElementById('successFailuresChart');
+          if (!ctx || typeof Chart === 'undefined') return;
+          var success = <%= [@stats.completed_jobs - @stats.failed_jobs, 0].max %>;
+          var failed = <%= @stats.failed_jobs %>;
+          var pending = <%= @stats.pending_jobs %>;
+          new Chart(ctx.getContext('2d'), {
+            type: 'doughnut',
+            data: {
+              labels: ['Success', 'Failed', 'Pending'],
+              datasets: [{
+                data: [success, failed, pending],
+                backgroundColor: ['rgba(25, 135, 84, 0.8)', 'rgba(220, 53, 69, 0.8)', 'rgba(108, 117, 125, 0.8)'],
+                borderWidth: 0
+              }]
+            },
+            options: {
+              responsive: true,
+              maintainAspectRatio: false,
+              plugins: {
+                legend: { position: 'bottom' }
+              }
+            }
+          });
+        })();
+        </script>
+      </div>
+    </div>
+  </div>
+</div>

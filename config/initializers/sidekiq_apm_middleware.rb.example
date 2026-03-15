@@ -1,0 +1,12 @@
+# Copy this to your Rails app's config/initializers/ and rename to .rb
+# to enable APM instrumentation (duration, memory, errors, stuck detection).
+
+return unless defined?(Sidekiq)
+
+Sidekiq.configure_server do |config|
+  config.server_middleware do |chain|
+    chain.add Sidekiq::Batch::Dashboard::Middleware::Instrumentation
+    chain.add Sidekiq::Batch::Dashboard::Middleware::RuntimeMonitor
+    chain.add Sidekiq::Batch::Dashboard::Middleware::ErrorCapture
+  end
+end
